@@ -16,7 +16,6 @@ def get_argument(str, argspec):
     list = str.split(None, 2)
     arg_name = list[1][:-1]
     arg_type = list[2]
-    print argspec
     optional = False
     if argspec.defaults:
         for i, j in enumerate(argspec.defaults):
