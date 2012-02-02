@@ -14,7 +14,7 @@ def ignored_function(func_str):
 
 def get_argument(str, argspec):
     list = str.split(None, 2)
-    arg_name = list[1][:-1]
+    arg_name = list[1].strip(':')
     arg_type = list[2]
     optional = False
     if argspec.defaults:
