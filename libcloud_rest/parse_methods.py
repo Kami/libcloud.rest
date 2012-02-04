@@ -17,7 +17,7 @@ def ignored_function(func_str):
 
 # make a dictionary of argument name, type, and whether it's optional
 # from the docstring and the function information using inspect
-def get_argument(docstring_line, argspec):
+def get_argument_dict(docstring_line, argspec, args_to_defaults=None):
     # expected str is following:
     # @type location: L{NodeLocation}
     docstring_list = docstring_line.split(None, 2)
@@ -25,10 +25,8 @@ def get_argument(docstring_line, argspec):
     arg_type = docstring_list[2]
     optional = False
     # ArgSpec(args=['self', 'location'], varargs=None, keywords=None, defaults=(None,))
-    if argspec.defaults:
-        for i, j in enumerate(argspec.defaults):
-            if argspec.args[-(i + 1)] == arg_name:
-                optional = True
+    if args_to_defaults:
+        optional = arg_name in [arg_to_default[0] for arg_to_default in args_to_defaults]
 
     return {'name': arg_name, 'type': arg_type, 'optional': optional}
 
@@ -47,6 +45,7 @@ func_list = []
 for method_tuple in inspect.getmembers(NodeDriver, inspect.ismethod):
     if not ignored_function(method_tuple[0]):
         func_detail = {}
+        args_to_defaults = None
         # get function name
         func_detail['function_name'] = method_tuple[0]
 
@@ -55,9 +54,11 @@ for method_tuple in inspect.getmembers(NodeDriver, inspect.ismethod):
         list_of_arguments = []
         list_of_return_values = []
         argspec = inspect.getargspec(method_tuple[1])
+        if argspec.defaults:
+            args_to_defaults = zip(reversed(argspec.args), argspec.defaults)
         for docstring_line in list_docs:
             if docstring_line.startswith('@type'):
-                list_of_arguments.append(get_argument(docstring_line, argspec))
+                list_of_arguments.append(get_argument_dict(docstring_line, argspec, args_to_defaults))
             elif docstring_line.startswith('@return'):
                 list_of_return_values.append(get_return(docstring_line))
 
